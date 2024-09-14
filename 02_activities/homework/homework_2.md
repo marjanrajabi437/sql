@@ -1,10 +1,12 @@
+
+
 --SELECT
 /* 1. Write a query that returns everything in the customer table. */
 SELECT * 
 FROM customer;
 
 
-/* 2. Write a query that displays all of the columns and 10 rows from the customer table, 
+/* 2. Write a query that displays all of the columns and 10 rows from the cus- tomer table, 
 sorted by customer_last_name, then customer_first_ name. */
 SELECT customer_first_name, customer_last_name 
 FROM customer
@@ -86,6 +88,6 @@ FROM vendor v
 INNER JOIN vendor_booth_assignments vb
      ON v.vendor_id = vb.vendor_id 
 
- 
+
 
 
