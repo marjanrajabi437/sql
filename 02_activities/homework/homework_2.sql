@@ -5,7 +5,7 @@ SELECT *
 FROM customer;
 
 
-/* 2. Write a query that displays all of the columns and 10 rows from the cus- tomer table, 
+/* 2. Write a query that displays all of the columns and 10 rows from the customer table, 
 sorted by customer_last_name, then customer_first_ name. */
 SELECT customer_first_name, customer_last_name 
 FROM customer
@@ -36,10 +36,9 @@ filtered by vendor IDs between 8 and 10 (inclusive) using either:
 	2.  one condition using BETWEEN
 */
 -- option 1
-SELECT *, quantity * cost_to_customer_per_qty AS [PRICE]
+SELECT*, quantity * cost_to_customer_per_qty AS [PRICE] 
 FROM customer_purchases
-WHERE vendor_id = 8
-OR    vendor_id = 10;
+WHERE vendor_id >= 8 AND vendor_id <=10;
 
 -- option 2
 
