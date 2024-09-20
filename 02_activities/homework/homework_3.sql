@@ -69,8 +69,6 @@ SELECT DISTINCT product_id  ,customer_id , quantity*cost_to_customer_per_qty
  ,sum(quantity*cost_to_customer_per_qty) as total_spent
   FROM customer_purchases
   WHERE  year = '2022' AND
-  month = '04' AND customer_id in (
-  SELECT customer_id
-  FROM customer_purchases
-  group by customer_id)
+  month = '04' 
+  group by  product_id , customer_id 
 
