@@ -1,4 +1,4 @@
-# Homework 3: Essential SQL
+ # Homework 3: Essential SQL
 
 -  	Due on Wendsday, September 18 at 11:59pm
 -  	Weight: 8% of total grade
@@ -53,10 +53,10 @@ To insert the new row use VALUES, specifying the value you want for each column:
 **HINT**: you might need to search for strfrtime modifers sqlite on the web to know what the modifers for month and year are!
 
 SELECT DISTINCT
-  product_id
-  ,customer_id
-  ,strftime('%m', market_date) as month
-  ,strftime('%Y', market_date) as year
+product_id
+,customer_id
+,strftime('%m', market_date) as month
+,strftime('%Y', market_date) as year
 FROM customer_purchases
 
 2. Using the previous query as a base, determine how much money each customer spent in April 2022. Remember that money spent is `quantity*cost_to_customer_per_qty`.
@@ -64,13 +64,11 @@ FROM customer_purchases
 
 
 SELECT DISTINCT product_id  ,customer_id , quantity*cost_to_customer_per_qty 
-  ,strftime('%m', market_date) as month
+ ,strftime('%m', market_date) as month
  ,strftime('%Y', market_date) as year
  ,sum(quantity*cost_to_customer_per_qty) as total_spent
-FROM customer_purchases
-WHERE  year = '2022' AND
-month = '04' AND customer_id in (
-SELECT customer_id
-FROM customer_purchases
-group by customer_id)
+  FROM customer_purchases
+  WHERE  year = '2022' AND
+  month = '04' 
+  group by  product_id , customer_id 
 
