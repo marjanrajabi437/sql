@@ -1,3 +1,4 @@
+
 -- Cross Join
 /*1. Suppose every vendor in the `vendor_inventory` table had 5 of each of their products to sell to **every** 
 customer on record. How much money would each vendor make per product? 
@@ -9,7 +10,30 @@ Think a bit about the row counts: how many distinct vendors, product names are t
 How many customers are there (y). 
 Before your final group by you should have the product of those two queries (x*y).  */
 
+SELECT 
+    vendor_products.vendor_name,
+    vendor_products.product_name,
+    SUM(5 * vendor_products.original_price) AS total_money_made_per_product
+FROM 
+    (
+        SELECT 
+            v.vendor_name,
+            p.product_name,
+            vi.original_price
+        FROM vendor_inventory vi
+        INNER JOIN vendor v
+            ON vi.vendor_id = v.vendor_id
+        INNER JOIN product p
+            ON vi.product_id = p.product_id
+    ) AS vendor_products
+CROSS JOIN 
+    (SELECT customer_id FROM customer) AS all_customers
+GROUP BY 
+    vendor_products.vendor_name, vendor_products.product_name
+ORDER BY 
+    vendor_products.vendor_name, vendor_products.product_name;
 
+\
 
 -- INSERT
 /*1.  Create a new table "product_units". 
@@ -17,11 +41,22 @@ This table will contain only products where the `product_qty_type = 'unit'`.
 It should use all of the columns from the product table, as well as a new column for the `CURRENT_TIMESTAMP`.  
 Name the timestamp column `snapshot_timestamp`. */
 
-
+DROP TABLE IF EXISTS temp.product_units;
+CREATE TEMP TABLE product_units AS 
+	SELECT *  -- ,CURRENT_TIMESTAMP AS snapshot_timestamp
+	FROM product
+	WHERE product_qty_type = 'unit' ;
+	
+	SELECT * ,CURRENT_TIMESTAMP AS snapshot_timestamp
+	FROM product_units
 
 /*2. Using `INSERT`, add a new row to the product_units table (with an updated timestamp). 
 This can be any product you desire (e.g. add another record for Apple Pie). */
 
+INSERT INTO product_units
+VALUES(26, 'Cinnamon', '5 lb', 1, 'unit');
+SELECT * ,CURRENT_TIMESTAMP AS snapshot_timestamp
+	FROM product_units
 
 
 -- DELETE
@@ -29,7 +64,10 @@ This can be any product you desire (e.g. add another record for Apple Pie). */
 
 HINT: If you don't specify a WHERE clause, you are going to have a bad time.*/
 
+DELETE from product_units
+WHERE product_id = 26;
 
+SELECT * from product_units
 
 -- UPDATE
 /* 1.We want to add the current_quantity to the product_units table. 
@@ -47,5 +85,70 @@ Third, SET current_quantity = (...your select statement...), remembering that WH
 Finally, make sure you have a WHERE statement to update the right row, 
 	you'll need to use product_units.product_id to refer to the correct row within the product_units table. 
 When you have all of these components, you can run the update statement. */
+
+ALTER TABLE product_units
+ADD current_quantity INT;
+
+
+--------First
+
+SELECT *
+FROM(   SELECT
+ 
+         product_id
+        ,quantity
+        ,ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY market_date DESC) AS last_quantity_value
+		
+         FROM vendor_inventory
+		 
+		 ) as  The
+ 
+ WHERE The.last_quantity_value = 1
+
+--------Second
+
+ SELECT 
+ 
+    p.product_id
+   ,COALESCE(vi.quantity, 0) AS last_quantity
+   
+   FROM product p
+       
+	LEFT JOIN ( SELECT
+ 
+                product_id
+               ,quantity
+               ,ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY market_date DESC) AS last_quantity_value
+		
+               FROM vendor_inventory
+	        ) vi	 
+		
+ ON p.product_id = vi.product_id AND vi.last_quantity_value = 1
+ 
+
+ --------Third
+
+UPDATE product_units as pu
+SET current_quantity = (
+    SELECT COALESCE(vi.quantity, 0)
+    FROM (
+        SELECT 
+            product_id
+            ,quantity
+            ,ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY market_date DESC) AS last_quantity_value
+        FROM vendor_inventory
+    ) vi
+    WHERE vi.product_id = pu.product_id   AND last_quantity_value = 1
+)
+WHERE EXISTS (
+    SELECT 1
+    FROM (
+        SELECT 
+            product_id
+            ,ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY market_date DESC) AS last_quantity_value
+        FROM vendor_inventory
+    ) vi
+    WHERE vi.product_id = pu.product_id   AND last_quantity_value = 1
+);
 
 
